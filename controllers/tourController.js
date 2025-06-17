@@ -60,9 +60,14 @@ exports.getAlltours = async (req, res) => {
     // algorithm
     // skip ((page - 1) * limit)
     console.log(req.query);
-    let page = req.query.page * 1;
-    let limit = req.query.limit * 1;
+    let page = req.query.page * 1 || 1;
+    let limit = req.query.limit * 1 || 10;
     query = query.skip((page - 1) * limit).limit(limit);
+
+    // if (req.query.page) {
+    //   const numOfToures = await Tour.countDocuments();
+    //   if (skip > numOfToures) throw new Error("this page not found");
+    // }
 
     // const query =  Tour.find()
     //   .where("duration")
