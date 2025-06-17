@@ -11,18 +11,16 @@ function transformQuery(query) {
   // API REQUEST             { 'duration[gte]': '5', difficulty: 'easy' }
   // WHAT API SHOULD BE LIKE { duration: { $gte: '5' }, difficulty: 'easy' }
   const newQuery = {};
-
-  for (const key in query) {
+  Object.entries(query).forEach(([key, value]) => {
     const match = key.match(/^(.+)\[(gte|gt|lte|lt)\]$/);
     if (match) {
-      const field = match[1];
-      const operator = match[2];
-      if (!newQuery[field]) newQuery[field] = {};
-      newQuery[field][`$${operator}`] = query[key];
+      const [, field, op] = match;
+      newQuery[field] = { ...(newQuery[field] || {}), [`$${op}`]: value };
     } else {
-      newQuery[key] = query[key];
+      newQuery[key] = value;
     }
-  }
+  });
+
   return newQuery;
 }
 
@@ -48,6 +46,28 @@ exports.getAlltours = async (req, res) => {
     } else {
       query = query.sort("-createdAt");
     }
+
+    // 3) filed limiting
+    if (req.query.fields) {
+      const fields = req.query.fields.split(",").join(" ");
+      query = query.select(fields);
+    } else {
+      query = query.select("-__v"); // every thing exclude __v
+    }
+
+    // 4) pagination
+    // page 2 11 - 20, limit 10 skip 10
+    // algorithm
+    // skip ((page - 1) * limit)
+    console.log(req.query);
+    let page = req.query.page * 1 || 1;
+    let limit = req.query.limit * 1 || 10;
+    query = query.skip((page - 1) * limit).limit(limit);
+
+    // if (req.query.page) {
+    //   const numOfToures = await Tour.countDocuments();
+    //   if (skip > numOfToures) throw new Error("this page not found");
+    // }
 
     // const query =  Tour.find()
     //   .where("duration")
