@@ -27,17 +27,7 @@ mongoose
 //const testTour = new Tour({name: "The Forest Hiker",rating: 4.7,price: 497}).save().then((doc) => console.log(doc)).catch((err) => console.log(err.message));
 
 // to connect local db
-// mongoose
-//   .connect(process.env.DATABASE_LOCAL, {
-//     // to skip warling and other during devolopment
-//     useNewUrlParser: true,
-//     useCreateIndex: true,
-//     useFindAndModify: false,
-//   })
-//   .then((con) => {
-//     // console.log(con.connections);
-//     console.log("database connected successful");
-//   });
+//mongoose.connect(process.env.DATABASE_LOCAL {useNewUrlParser: true,useCreateIndex: true,useFindAndModify: false,}).then((con)=>{console.log(con.connections)});
 
 const port = process.env.PORT || 3000;
 // Start The server
