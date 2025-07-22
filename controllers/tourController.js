@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const Tour = require("../models/tourModel.js");
+const AppError = require("../utils/appError.js");
 const APIFeatures = require("../utils/APIFeatures.js").default;
+const catchAsync = require("../utils/catchAsync.js");
 
 // get data from jsonText file
 // const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`, "utf-8"));
@@ -15,95 +17,76 @@ const APIFeatures = require("../utils/APIFeatures.js").default;
 //   next();
 // };
 
-exports.getAlltours = async (req, res) => {
-  try {
-    // const query =Tour.find().where("duration").equals(5).where("difficulty").equals("easy");
+exports.getAlltours = catchAsync(async (req, res) => {
+  // const query =Tour.find().where("duration").equals(5).where("difficulty").equals("easy");
+  // Execute the query
+  const features = new APIFeatures(Tour.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+  const tours = await features.query;
 
-    // Execute the query
-    const features = new APIFeatures(Tour.find(), req.query)
-      .filter()
-      .sort()
-      .limitFields()
-      .paginate();
-    const tours = await features.query;
+  res.status(200).json({
+    status: "success",
+    results: tours.length,
+    data: {
+      tours,
+    },
+  });
 
-    res.status(200).json({
-      status: "success",
-      results: tours.length,
-      data: {
-        tours,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: "failed",
-      message: err.message,
-    });
-  }
-};
+  return next(new AppError(err.message, 404));
+});
 
-exports.getTour = async (req, res) => {
+exports.getTour = catchAsync(async (req, res, next) => {
   const id = req.params.id; // { id: '2' }
   const tour = await Tour.findById(id);
   // Tour.findOne({_id:req.params.id})
   if (!tour) {
-    return res.status(404).json({
-      status: "fail",
-      message: "invalid or not found ID",
-    });
+    // return res.status(404).json({
+    //   status: "fail",
+    //   message: "invalid or not found ID",
+    // });
+    return next(new AppError("invalid or not found ID", 404));
   }
   res.status(200).json({
     status: "success",
     data: { tour },
     id,
   });
-};
+});
 
 //* 52- post requests
-exports.createTour = async (req, res) => {
-  try {
-    // old wae to save
-    // const testTour = new Tour({})
-    // testTour.save().then()
-    // better
-    const newTour = await Tour.create(req.body);
-    res.status(201).json({
-      status: "success",
-      data: {
-        newTour,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: "failed",
-      message: err.message,
-    });
-  }
-};
+exports.createTour = catchAsync(async (req, res, next) => {
+  // old wae to save
+  // const testTour = new Tour({})
+  // testTour.save().then()
+  // better
+  const newTour = await Tour.create(req.body);
+  res.status(201).json({
+    status: "success",
+    data: {
+      newTour,
+    },
+  });
+});
 
 //* 55 - patch requests
-exports.updateTour = async (req, res) => {
-  try {
-    // oldTour =await Tour.findById(req.params.id)
-    // oldTour.name = req.params.name
-    // newTour = Tour.create(req.params)
-    const updatedTour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    res.status(200).json({
-      status: "success",
-      data: {
-        tour: updatedTour,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: "faild",
-      message: err.message,
-    });
-  }
-};
+exports.updateTour = catchAsync(async (req, res, next) => {
+  // oldTour =await Tour.findById(req.params.id)
+  // oldTour.name = req.params.name
+  // newTour = Tour.create(req.params)
+  const updatedTour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  res.status(200).json({
+    status: "success",
+    data: {
+      tour: updatedTour,
+    },
+  });
+});
 
 //* 56 - delete requests
 exports.deleteTour = async (req, res) => {
@@ -186,7 +169,7 @@ exports.getMonthlyPlan = async (req, res) => {
       {
         $addFields: { month: "$_id" },
       },
-      { $project: { _id: 0 } },
+      { $project: { _id: 0 } }, // remove _id prob
       {
         $sort: { numberOfTours: -1 },
       },
