@@ -1,13 +1,15 @@
-const fs = require('fs');
+const fs = require("fs");
+const User = require("../models/userModel");
 
 const users = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/users.json`, 'utf-8')
+  fs.readFileSync(`${__dirname}/../dev-data/data/users.json`, "utf-8")
 );
 // console.log(users);
 
-exports.getAllUsers = (req, res) => {
+exports.getAllUsers = async (req, res) => {
+  const users = await User.find();
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: { users },
   });
 };
@@ -18,7 +20,7 @@ exports.getUser = (req, res) => {
   const userAcc = users.find((el) => el._id === id);
   console.log(userAcc);
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: { userAcc },
   });
 };

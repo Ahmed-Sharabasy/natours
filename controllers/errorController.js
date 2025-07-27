@@ -1,12 +1,18 @@
+const AppError = require("../utils/appError.js");
+
 sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     error: err,
     Error_Stack: err.stack,
-    status: err.status,
     message: err.message,
-    from: "Iam from globalErrorHandler",
   });
 };
+
+const handleCastErrorDB = (err) => {
+  const message = `Invalid ${err.path}: ${err.value}.`;
+  return new AppError(message, 400);
+};
+
 sendErrorProd = (err, res) => {
   // Send to client
   if (err.isOperational) {
@@ -32,6 +38,8 @@ module.exports = (err, req, res, next) => {
   if (process.env.NODE_ENV === "devolopment") {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === "production") {
+    let error = { ...err };
+    if ((error.name = "CastError")) error = handleCastErrorDB(error);
     sendErrorProd(err, res);
   }
 };
