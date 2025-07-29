@@ -24,6 +24,12 @@ app.use(express.static(`${__dirname}/public`));
 // app.patch('/api/v1/tours/:id', updateTour);
 // app.delete('/api/v1/tours/:id', deleteTour);
 
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  console.log(req.headers, req.requestTime);
+  next();
+});
+
 // ROUTES
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);

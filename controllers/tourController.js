@@ -26,6 +26,9 @@ exports.getAlltours = catchAsync(async (req, res) => {
     .limitFields()
     .paginate();
   const tours = await features.query;
+  if (!tours) {
+    return next(new AppError(err.message, 404));
+  }
 
   res.status(200).json({
     status: "success",
@@ -34,8 +37,6 @@ exports.getAlltours = catchAsync(async (req, res) => {
       tours,
     },
   });
-
-  return next(new AppError(err.message, 404));
 });
 
 exports.getTour = catchAsync(async (req, res, next) => {

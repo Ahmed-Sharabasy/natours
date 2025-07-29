@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { promisify } = require("util"); // promisify builtin node m used to return promise from opp
 
 const User = require("../models/userModel.js");
 const catchAsync = require("../utils/catchAsync.js");
@@ -54,4 +55,22 @@ exports.login = catchAsync(async (req, res, next) => {
       user,
     },
   });
+});
+
+exports.protect = catchAsync(async (req, res, next) => {
+  //1) check if token founded in req
+  let token;
+  // prettier-ignore
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")){
+    token = req.headers.authorization.split(" ")[1];
+  }
+  if (!token)
+    return next(new AppError("you Are not logged in please Log In!", 401));
+  console.log(token);
+  //2) verification the token
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  console.log(decoded);
+  //3) check if user still exist ex(still in db)
+  //4) check if user changed his pass after jwt token is issued
+  next();
 });
