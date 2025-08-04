@@ -17,6 +17,8 @@ exports.signup = catchAsync(async (req, res) => {
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
+    passwordChangedAt: req.body.passwordChangedAt || undefined,
+    role: req.body.role || undefined,
   });
   const token = signToken(newUser.id);
 
@@ -31,22 +33,18 @@ exports.signup = catchAsync(async (req, res) => {
 
 exports.login = catchAsync(async (req, res, next) => {
   let { email, password } = req.body;
-
   // 1) Check If email and password exist
   if (!email || !password) {
     return next(new AppError("enter email and password", 404));
   }
-
   // 2) Check If user exist and password is correct
   //.select("+password")=> to select password beacuse you but {select: false} in password schema field
   const user = await User.findOne({ email }).select("+password");
-
   // prettier-ignore
   if (!user || !(await user.checkPasswordIsTheSameOrNot(password , user.password))){
     // 401 faild in auth
     return next(new AppError('invalied user or password' , 401))
   }
-
   const token = signToken(user._id);
   res.status(200).json({
     status: "success",
@@ -57,6 +55,7 @@ exports.login = catchAsync(async (req, res, next) => {
   });
 });
 
+// Protected Route Function To make sure user is Auth
 exports.protect = catchAsync(async (req, res, next) => {
   //1) check if token founded in req
   let token;
@@ -68,9 +67,43 @@ exports.protect = catchAsync(async (req, res, next) => {
     return next(new AppError("you Are not logged in please Log In!", 401));
   console.log(token);
   //2) verification the token
+  // promisify(jwt.verify) return function ,afterthen await call this func with (token, peJ_SCRET) params
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
   console.log(decoded);
   //3) check if user still exist ex(still in db)
+  const currentUser = await User.findById(decoded.id);
+  if (!currentUser) return next(new AppError("no user found in db", 401));
+  console.log(currentUser);
   //4) check if user changed his pass after jwt token is issued
+  if (currentUser.changedPasswordAfter(decoded.iat)) {
+    return next(
+      new AppError("user changed his password , enter new passwod", 401)
+    );
+  }
+  // Grant Access To the Protected Route
+  // save the current User to req.user for later use
+  req.user = currentUser;
   next();
+});
+
+// check Who Have Permisions to do this job
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    // roles:["user", "guide", "leads-guide", "admin"] => role = 'user'
+    if (!roles.includes(req.user.role)) {
+      return next(new AppError("user not Authorized to do this Action", 403));
+    }
+    next();
+  };
+};
+
+exports.forgetPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) {
+    return next(new AppError("enter email", 401));
+  }
+  let user = await User.findOne({ email });
+  if (!user) {
+    return next(new AppError("user or email not founded", 401));
+  }
 });
