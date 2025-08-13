@@ -1,17 +1,16 @@
-const express = require("express");
-const morgan = require("morgan");
-const tourRouter = require("./routes/tourRoutes");
-const userRouter = require("./routes/userRoutes");
-const AppError = require("./utils/appError.js");
-const globalErrorHandler = require("./controllers/errorController.js");
+const express = require('express');
+const morgan = require('morgan');
+const tourRouter = require('./routes/tourRoutes');
+const userRouter = require('./routes/userRoutes');
+const globalErrorHandler = require('./controllers/errorController.js');
 
 const app = express();
 
 // using middleware 53
 // app.use((req, res, next) => {next()});
+
 app.use(express.json());
-// in morgan fun it return fun((req, res, next))
-app.use(morgan("dev"));
+app.use(morgan('dev')); // in morgan fun it return fun((req, res, next))
 
 // read static files
 app.use(express.static(`${__dirname}/public`));
@@ -31,12 +30,10 @@ app.use((req, res, next) => {
 });
 
 // ROUTES
-app.use("/api/v1/tours", tourRouter);
-app.use("/api/v1/users", userRouter);
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
 
-// app.all("*name", (req, res, next) => {
-//   next(new AppError("cant find the url ", 404));
-// });
+// app.all("*name", (req, res, next) => {next(new AppError("cant find the url ", 404))});
 
 app.use(globalErrorHandler);
 

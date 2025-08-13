@@ -1,9 +1,9 @@
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-const app = require("./app");
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const app = require('./app');
 
-process.on("uncaughtException", (err) => {
-  console.log("uncaughtException");
+process.on('uncaughtException', (err) => {
+  console.log('uncaughtException');
   console.error(err.name, err.message);
   server.close(() => {
     process.exit(1); //Exit The Server
@@ -12,21 +12,19 @@ process.on("uncaughtException", (err) => {
 
 // console.log(app.get('env'));
 // console.log(process.env);
-dotenv.config({ path: "./config.env" });
+dotenv.config({ path: './config.env' });
 
 const DB = process.env.DATABASE.replace(
-  "<PASSWORD>",
+  '<PASSWORD>',
   process.env.DATABASE_PASSWORD
 );
 
 // this for connecting atls db
 mongoose.connect(DB).then((con) => {
   // console.log(con.connections);
-  console.log("database connected successful");
+  console.log('database connected successful');
 });
 // .catch((err) => {console.log("bad cinnnnnnnnnnnnnnnnnnn")});
-
-//const testTour = new Tour({name: "The Forest Hiker",rating: 4.7,price: 497}).save().then((doc) => console.log(doc)).catch((err) => console.log(err.message));
 
 // to connect local db
 //mongoose.connect(process.env.DATABASE_LOCAL {useNewUrlParser: true,useCreateIndex: true,useFindAndModify: false,}).then((con)=>{console.log(con.connections)});
@@ -37,8 +35,8 @@ const server = app.listen(port, () => {
   console.log(`Server Is Running on port ${port}`);
 });
 
-process.on("unhandledRejection", (err) => {
-  console.log("unhandledRejection");
+process.on('unhandledRejection', (err) => {
+  console.log('unhandledRejection');
   console.error(err.name, err.message);
   server.close(() => {
     process.exit(1); //Exit The Server
