@@ -46,8 +46,7 @@ const userSchema = new mongoose.Schema({
 userSchema.pre('save', async function (next) {
   // Work only when pass is modified
   if (!this.isModified('password')) return next();
-  // degree of incrypt 12
-  this.password = await bcrypt.hash(this.password, 12);
+  this.password = await bcrypt.hash(this.password, 12); // degree of incrypt 12
   // delete passwordConfirm from db
   this.passwordConfirm = undefined;
   next();
@@ -58,6 +57,7 @@ userSchema.methods.checkPasswordIsTheSameOrNot = async function (password , user
   return await bcrypt.compare(password, userPassword)
 }
 
+// check if password changed after token was signed of not
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     let passwordChangedDate = parseInt(this.passwordChangedAt.getTime() / 1000);
@@ -66,6 +66,7 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   return false;
 };
 
+// create pass reset token , expires and save them in db
 userSchema.methods.createResetPasswordToken = async function () {
   const resetToken = crypto.randomBytes(32).toString('hex');
 
@@ -73,10 +74,9 @@ userSchema.methods.createResetPasswordToken = async function () {
     .createHash('sha256')
     .update(resetToken)
     .digest('hex');
-  this.passwordResetTokenExpires = Date.now() + 10 * 60 * 1000;
-
-  console.log({ resetToken }, this.passwordResetToken);
-
+  this.passwordResetTokenExpires = Date.now() + 10 * 60 * 1000; // after 10 min from now in utc f
+  // to make the date like my computer
+  // new Date(Date.now() + 10 * 60 * 1000).toLocaleTimeString()
   return resetToken;
 };
 

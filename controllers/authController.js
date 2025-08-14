@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util'); // promisify builtin node m used to return promise from opp
+const crypto = require('crypto');
 
 const User = require('../models/userModel.js');
 const catchAsync = require('../utils/catchAsync.js');
@@ -74,7 +75,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   //3) check if user still exist ex(still in db)
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) return next(new AppError('no user found in db', 401));
-  console.log(currentUser);
+  // console.log(currentUser);
   //4) check if user changed his pass after jwt token is issued
   if (currentUser.changedPasswordAfter(decoded.iat)) {
     return next(
@@ -112,7 +113,6 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
   // 3) send the token using by email using nodemailer
   // prettier-ignore
   const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetpassword/${resetToken}`;
-  console.log(resetURL);
 
   const message = `forget password enter the link to reset pass ${resetURL}`;
   try {
@@ -134,6 +134,21 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
+  //1) get user based on the token
+  const user = await User.findOne({
+    passwordResetToken: crypto
+      .createHash('sha256')
+      .update(req.params.token)
+      .digest('hex'),
+    passwordResetTokenExpires: { $gt: Date.now() }, // if true => token is valied and return user
+  });
+  //2) set new password if token not expierd and there are user
+  if (!user) {
+    return next(new AppError('token is invalied or expired', 400));
+  }
+  //3) update changed password proberty for the user
+  //4) log user in by send the jwt token
+
   res.status(200).json({
     status: 'success',
     data: {},
