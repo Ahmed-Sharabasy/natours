@@ -67,7 +67,6 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
   if (!token)
     return next(new AppError('you Are not logged in please Log In!', 401));
-  console.log(token);
   //2) verification the token
   // promisify(jwt.verify) return function ,afterthen await call this func with (token, peJ_SCRET) params
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
@@ -140,17 +139,46 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
       .createHash('sha256')
       .update(req.params.token)
       .digest('hex'),
+    // passwordResetTokenExpires must be 10 min after this time
     passwordResetTokenExpires: { $gt: Date.now() }, // if true => token is valied and return user
   });
   //2) set new password if token not expierd and there are user
   if (!user) {
     return next(new AppError('token is invalied or expired', 400));
   }
-  //3) update changed password proberty for the user
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.passwordResetToken = undefined;
+  user.passwordResetTokenExpires = undefined;
+  await user.save();
+  //3) update the date of changed password At proberty for the user
+
   //4) log user in by send the jwt token
+  const token = signToken(user._id);
 
   res.status(200).json({
     status: 'success',
-    data: {},
+    user,
+    token,
+  });
+});
+
+// update user data expect password
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select('+password');
+  // console.log(user);
+
+  if (!user.checkPasswordIsTheSameOrNot(req.body.oldPassword, user.password)) {
+    return next(new AppError('passwords are not the same '), 401);
+  }
+
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  await user.save();
+
+  // console.log(user);
+  res.status(200).json({
+    status: 'success',
+    user,
   });
 });

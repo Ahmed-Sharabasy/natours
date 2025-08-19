@@ -15,13 +15,16 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     validate: [validator.isEmail, 'please enter a valid email'],
   },
+
   photo: String,
+
   password: {
     type: String,
     required: [true, 'A user must have a password'],
     minlength: 8,
     select: false,
   },
+
   passwordConfirm: {
     type: String,
     required: [true, 'A user must have a passwordConfirm'],
@@ -33,6 +36,7 @@ const userSchema = new mongoose.Schema({
       message: 'please write pass correctly',
     },
   },
+
   passwordChangedAt: Date,
   role: {
     type: String,
@@ -41,6 +45,18 @@ const userSchema = new mongoose.Schema({
   },
   passwordResetToken: String,
   passwordResetTokenExpires: Date,
+
+  active: {
+    type: Boolean,
+    select: false,
+    default: true,
+  },
+});
+
+// all words start with find do : select only doc with prob active = true
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+  next();
 });
 
 userSchema.pre('save', async function (next) {
@@ -49,6 +65,14 @@ userSchema.pre('save', async function (next) {
   this.password = await bcrypt.hash(this.password, 12); // degree of incrypt 12
   // delete passwordConfirm from db
   this.passwordConfirm = undefined;
+  next();
+});
+
+// change passwordChangedAt prob if password is changed
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
+
+  this.passwordChangedAt = Date.now() - 1000;
   next();
 });
 
