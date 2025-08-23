@@ -1,16 +1,41 @@
 const express = require('express');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const globalErrorHandler = require('./controllers/errorController.js');
+const ExpressMongoSanitize = require('express-mongo-sanitize');
+const sanitizeHtml = require('sanitize-html');
+const hpp = require('hpp');
 
 const app = express();
 
-// using middleware 53
-// app.use((req, res, next) => {next()});
+// using Global middleware 53, Ex: app.use((req, res, next) => {next()});
 
+// save app from attaks , ..... by sitting http hedears
+app.use(helmet());
+
+// Body parser, reading data from req.body like in postman
 app.use(express.json());
-app.use(morgan('dev')); // in morgan fun it return fun((req, res, next))
+
+// Data sanitization against NoSQL query injection
+// app.use(ExpressMongoSanitize()); // like "email": { "$gt": "" },
+
+// Data sanitization against XSS attakes
+// app.use(sanitizeHtml())
+// app.use(hpp()); // clean query string like ?sort=price&sort=price
+
+// write the Method,  url , statusCode , Time
+app.use(morgan('dev'));
+
+// limmiter function => limit number of request ber IP user
+const limiter = rateLimit({
+  max: 335, /// max num of request
+  windowMs: 60 * 60 * 1000, // ber how much time ber mile second -> 1 hour
+  message: 'Too many request from this IP, please try again later in 1 hour',
+});
+app.use('/api', limiter);
 
 // read static files
 app.use(express.static(`${__dirname}/public`));
