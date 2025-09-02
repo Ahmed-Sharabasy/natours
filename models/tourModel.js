@@ -1,27 +1,27 @@
-const mongoose = require("mongoose");
-const slugify = require("slugify");
+const mongoose = require('mongoose');
+const slugify = require('slugify');
 // const validator = require("validator");
 
 const tourSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "A tour must have a name"],
+      required: [true, 'A tour must have a name'],
       unique: true,
       trim: true,
-      maxlength: [40, "enter less than 40"],
+      maxlength: [40, 'enter less than 40'],
       // validate: [validator.isAlpha, "tour name must only contain charachter"], // 3rd party libirary
     },
     slug: String,
-    duration: { type: Number, required: [true, "A tour must have a duration"] },
+    duration: { type: Number, required: [true, 'A tour must have a duration'] },
     maxGroupSize: {
       type: Number,
-      required: [true, "A tour must Group Size"],
+      required: [true, 'A tour must Group Size'],
     },
     difficulty: {
       type: String,
-      required: [true, "A tour must have a difficulty"],
-      enum: ["easy", "medium", "difficult"],
+      required: [true, 'A tour must have a difficulty'],
+      enum: ['easy', 'medium', 'difficult'],
     },
     ratingsAverage: {
       type: Number,
@@ -34,7 +34,7 @@ const tourSchema = new mongoose.Schema(
 
     price: {
       type: Number,
-      required: [true, "A tour must have a price"],
+      required: [true, 'A tour must have a price'],
     },
     priceDiscount: {
       type: Number,
@@ -42,13 +42,13 @@ const tourSchema = new mongoose.Schema(
         validator: function (value) {
           return value < this.price;
         },
-        message: "discount must be lower than price",
+        message: 'discount must be lower than price',
       },
     },
     summary: {
       type: String,
       trim: true,
-      required: [true, "A tour must have a summary"],
+      required: [true, 'A tour must have a summary'],
     },
     discription: {
       type: String,
@@ -56,7 +56,7 @@ const tourSchema = new mongoose.Schema(
     },
     imageCover: {
       type: String,
-      required: [true, "A tour must have a Cover image"],
+      required: [true, 'A tour must have a Cover image'],
     },
     images: [String],
     createdAt: {
@@ -64,6 +64,30 @@ const tourSchema = new mongoose.Schema(
       default: Date.now(),
     },
     startDates: [Date],
+    startLocation: {
+      // GeoJSON
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
   },
   {
     toJSON: { virtuals: true },
@@ -72,18 +96,18 @@ const tourSchema = new mongoose.Schema(
 );
 
 // Bulid Virtual prob
-tourSchema.virtual("durationWeeks").get(function () {
+tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
 // Doucument MIDDLEWARE
-tourSchema.pre("save", function (next) {
+tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
 
 // AGGREGATION MIDDLEWARE
-tourSchema.pre("aggregate", function (next) {
+tourSchema.pre('aggregate', function (next) {
   // before entere aggregatefunction in tourcontrller it will match only maxGroupSize >= 10
   this.pipeline().unshift({
     $match: { maxGroupSize: { $gte: 10 } },
@@ -92,6 +116,6 @@ tourSchema.pre("aggregate", function (next) {
   next();
 });
 
-const Tour = mongoose.model("Tour", tourSchema);
+const Tour = mongoose.model('Tour', tourSchema);
 
 module.exports = Tour;
