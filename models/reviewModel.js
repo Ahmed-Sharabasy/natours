@@ -17,6 +17,14 @@ const reviewSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    tour: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Tour',
+    },
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+    },
   },
   {
     // Ensures that virtual properties are included when output as JSON or Objects
@@ -24,6 +32,17 @@ const reviewSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+reviewSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'tour',
+    select: 'name',
+  }).populate({
+    path: 'user',
+    select: 'name',
+  });
+  next();
+});
 
 const Review = mongoose.model('Review', reviewSchema);
 

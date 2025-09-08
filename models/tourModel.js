@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const User = require('./userModel.js');
+const User = require('./userModel');
 // const validator = require("validator");
 
 const tourSchema = new mongoose.Schema(
@@ -89,13 +89,7 @@ const tourSchema = new mongoose.Schema(
         day: Number,
       },
     ],
-    // guides chiled Refrence (User) , [] => for many user ID
-    guides: [
-      {
-        type: mongoose.Schema.ObjectId, // MongooDB UserID
-        ref: 'User', // refrence Is User Doucument
-      },
-    ],
+    guieds: [{ type: mongoose.Schema.ObjectId, ref: 'User' }],
   },
   {
     toJSON: { virtuals: true },
@@ -108,26 +102,28 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+// Bulid Virtual prob
+// tourSchema.virtual()
+
 // Doucument MIDDLEWARE
 
-// this was for EMBEDDING user In tour Guides
 // tourSchema.pre('save', async function (next) {
-//   const guidesPromises = this.guides.map(async (id) => await User.findById(id));
-//   this.guides = await Promise.all(guidesPromises);
+//   const guidesPromise = this.guieds.map(async (id) => await User.findById(id));
+//   this.guieds = await Promise.all(guidesPromise);
+//   console.log(this.guieds);
 //   next();
 // });
 
-tourSchema.pre('save', function (next) {
-  this.slug = slugify(this.name, { lower: true });
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'guieds',
+    select: '-__v -passwordChangedAt',
+  });
   next();
 });
 
-// Populating Tour Guides For All Quereys and remove v , created at
-tourSchema.pre(/^find/, function (next) {
-  this.populate({
-    path: 'guides',
-    select: '-__v -passwordChangedAt ',
-  });
+tourSchema.pre('save', function (next) {
+  this.slug = slugify(this.name, { lower: true });
   next();
 });
 

@@ -4,6 +4,7 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 const globalErrorHandler = require('./controllers/errorController.js');
 const ExpressMongoSanitize = require('express-mongo-sanitize');
 const sanitizeHtml = require('sanitize-html');
@@ -57,6 +58,7 @@ app.use((req, res, next) => {
 // ROUTES
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/review', reviewRoutes);
 
 // app.all("*name", (req, res, next) => {next(new AppError("cant find the url ", 404))});
 
