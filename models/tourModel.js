@@ -103,7 +103,11 @@ tourSchema.virtual('durationWeeks').get(function () {
 });
 
 // Bulid Virtual prob
-// tourSchema.virtual()
+tourSchema.virtual('reviews', {
+  ref: 'Review', // Review Model
+  foreignField: 'tour', // filed you created in Review schema to store tourID
+  localField: '_id', // ID of Tour in db
+});
 
 // Doucument MIDDLEWARE
 
