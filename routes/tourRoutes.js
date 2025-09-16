@@ -1,9 +1,24 @@
 const express = require('express');
 const tourController = require('../controllers/tourcontroller.js');
 const authController = require('../controllers/authController.js');
+// const reviewController = require('../controllers/reviewController.js');
+const reviewRoutes = require('./reviewRoutes');
 
 const router = express.Router();
 // router.param('id', tourController.checkId);
+
+// implement nested routes
+// tours/1544id/reviews
+// router
+//   .route('/:tourId/reviews')
+//   .post(
+//     authController.protect,
+//     authController.restrictTo('user'),
+//     reviewController.createReview
+//   );
+
+// Nested Routes with express
+router.use('/:tourId/reviews', reviewRoutes);
 
 // router
 //   .route("/top-5-cheap")

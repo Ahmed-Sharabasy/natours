@@ -42,7 +42,7 @@ app.use('/api', limiter);
 app.use(express.static(`${__dirname}/public`));
 // app.use(express.static(`./public`));
 
-// ROUTING
+// ROUTING Old way , or just static way
 // app.get('/api/v1/tours', getAlltours);
 // app.get('/api/v1/tours/:id', getTour);
 // app.post('/api/v1/tours', createTour);
