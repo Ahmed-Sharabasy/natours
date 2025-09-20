@@ -1,4 +1,5 @@
 const Review = require('../Models/reviewModel.js');
+const factory = require('./handlerFactory.js');
 
 // Get all reviews
 exports.getAllReviews = async (req, res) => {
@@ -17,24 +18,15 @@ exports.getAllReviews = async (req, res) => {
     },
   });
 };
-
-// Create a new review
-exports.createReview = async (req, res) => {
+// create a middleware run to init req.body.user , tour before createReview func
+exports.setTourUserIds = (req, res, next) => {
   // this for nested route , if we not defied them
   if (!req.body.user) req.body.user = req.user.id;
   if (!req.body.tour) req.body.tour = req.params.tourId;
-
-  const newReview = await Review.create({
-    review: req.body.review,
-    rating: req.body.rating,
-    tour: req.body.tour,
-    user: req.body.user,
-  });
-
-  res.status(201).json({
-    status: 'success',
-    data: {
-      review: newReview,
-    },
-  });
+  next();
 };
+
+// Create a new review
+exports.createReview = factory.createOne(Review);
+exports.deleteReview = factory.deleteOne(Review);
+exports.updateReview = factory.updateOne(Review);

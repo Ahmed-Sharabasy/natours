@@ -16,7 +16,17 @@ router
   .post(
     authController.protect,
     authController.restrictTo('user'),
+    reviewController.setTourUserIds, // define req.user, req.tour Ids before create Review Fun
     reviewController.createReview
   );
+
+router
+  .route('/:id')
+  .delete(
+    // authController.protect,
+    // authController.restrictTo('user'),
+    reviewController.deleteReview
+  )
+  .patch(reviewController.updateReview);
 
 module.exports = router;

@@ -102,7 +102,7 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
-// Bulid Virtual prob
+//?very Important Bulid Virtual prob
 tourSchema.virtual('reviews', {
   ref: 'Review', // Review Model
   foreignField: 'tour', // filed you created in Review schema to store tourID
@@ -113,10 +113,7 @@ tourSchema.virtual('reviews', {
 
 // tourSchema.pre('save', async function (next) {
 //   const guidesPromise = this.guieds.map(async (id) => await User.findById(id));
-//   this.guieds = await Promise.all(guidesPromise);
-//   console.log(this.guieds);
-//   next();
-// });
+//   this.guieds = await Promise.all(guidesPromise)next()});
 
 tourSchema.pre(/^find/, function (next) {
   this.populate({

@@ -2,6 +2,7 @@ const Tour = require('../models/tourModel.js');
 const AppError = require('../utils/appError.js');
 const APIFeatures = require('../utils/APIFeatures.js').default;
 const catchAsync = require('../utils/catchAsync.js');
+const factory = require('./handlerFactory.js');
 
 // get data from jsonText file
 // const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`, "utf-8"));
@@ -59,52 +60,15 @@ exports.getTour = catchAsync(async (req, res, next) => {
 });
 
 //* 52- post requests
-exports.createTour = catchAsync(async (req, res, next) => {
-  // old wae to save
-  // const testTour = new Tour({})
-  // testTour.save().then()
-  // better
-  const newTour = await Tour.create(req.body);
-  res.status(201).json({
-    status: 'success',
-    data: {
-      newTour,
-    },
-  });
-});
+// old way to save
+// const testTour = new Tour({}) ,testTour.save().then()
+exports.createTour = factory.createOne(Tour);
 
 //* 55 - patch requests
-exports.updateTour = catchAsync(async (req, res, next) => {
-  // oldTour =await Tour.findById(req.params.id)
-  // oldTour.name = req.params.name
-  // newTour = Tour.create(req.params)
-  const updatedTour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour: updatedTour,
-    },
-  });
-});
+exports.updateTour = factory.updateOne(Tour);
 
 //* 56 - delete requests
-exports.deleteTour = async (req, res) => {
-  try {
-    await Tour.findByIdAndDelete(req.params.id);
-    res.status(204).json({
-      status: 'success',
-      data: null,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'faild',
-      data: err.message,
-    });
-  }
-};
+exports.deleteTour = factory.deleteOne(Tour);
 
 exports.getTourStats = async (req, res) => {
   try {

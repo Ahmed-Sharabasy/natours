@@ -2,6 +2,7 @@ const fs = require('fs');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync.js');
 const AppError = require('../utils/appError.js');
+const factory = require('./handlerFactory.js');
 
 const users = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/users.json`, 'utf-8')
@@ -15,9 +16,7 @@ const filterObj = function (data, ...arg) {
   console.log(keys);
   // only update user prob by value we want
   keys.forEach((key) => {
-    if (arg.includes(key)) {
-      filterdDataObj[key] = data[key];
-    }
+    if (arg.includes(key)) filterdDataObj[key] = data[key];
   });
   return filterdDataObj;
 };
@@ -45,20 +44,6 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.deleteMe = catchAsync(async (req, res, next) => {
-  //1) set prob of user active = false
-  // const user = await User.findByIdAndUpdate(req.user.id, filterBody, {
-  //   runValidators: true,
-  //   new: true,
-  // });
-  await User.findByIdAndUpdate(req.user.id, { active: false });
-
-  res.status(204).json({
-    status: 'success',
-    dara: null,
-  });
-});
-
 exports.getAllUsers = async (req, res) => {
   const users = await User.find();
   res.status(200).json({
@@ -77,3 +62,17 @@ exports.getUser = (req, res) => {
     data: { userAcc },
   });
 };
+
+// Delete User : this when user delete himself
+exports.deleteMe = catchAsync(async (req, res, next) => {
+  //1) set prob of user active = false
+  // const user = await User.findByIdAndUpdate(req.user.id, filterBody,{runValidators: true,new: true});
+  await User.findByIdAndUpdate(req.user.id, { active: false });
+  res.status(204).json({ status: 'success', data: null });
+});
+
+// this for admins
+exports.deleteUser = factory.deleteOne(User); // Work on this Function Later
+
+//! Do NOT update passwords with this ?(MiddleWare validators dosnt work)
+exports.updateUser = factory.updateOne(User); // Work on this Function Later

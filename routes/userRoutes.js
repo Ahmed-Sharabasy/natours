@@ -1,6 +1,7 @@
 const express = require('express');
-const userController = require('../controllers/usercontroller.js');
+const userController = require('../controllers/userController.js');
 const authController = require('../controllers/authController.js');
+const { patch } = require('./reviewRoutes.js');
 
 const router = express.Router();
 
@@ -15,7 +16,6 @@ router.route('/signup').post(authController.signup);
 router.route('/login').post(authController.login);
 
 router.route('/').get(userController.getAllUsers);
-router.route('/:id').get(userController.getUser);
 
 router
   .route('/updateMe')
@@ -23,6 +23,13 @@ router
 router
   .route('/deleteMe')
   .delete(authController.protect, userController.deleteMe);
+
+//TODO Work on them later : Delete , Update User
+router
+  .route('/:id')
+  .get(userController.getUser)
+  .delete(userController.deleteUser)
+  .patch(userController.updateUser);
 
 // export one thing only
 module.exports = router;
