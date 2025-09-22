@@ -1,7 +1,7 @@
 const Tour = require('../models/tourModel.js');
 const AppError = require('../utils/appError.js');
-const APIFeatures = require('../utils/APIFeatures.js').default;
-const catchAsync = require('../utils/catchAsync.js');
+// const APIFeatures = require('../utils/APIFeatures.js').default;
+// const catchAsync = require('../utils/catchAsync.js');
 const factory = require('./handlerFactory.js');
 
 // get data from jsonText file
@@ -19,45 +19,9 @@ const factory = require('./handlerFactory.js');
 
 //const testTour = new Tour({name: "The Forest Hiker",rating: 4.7,price: 497}).save().then((doc) => console.log(doc)).catch((err) => console.log(err.message));
 
-exports.getAlltours = catchAsync(async (req, res) => {
-  // const query =Tour.find().where("duration").equals(5).where("difficulty").equals("easy");
-  // Execute the query
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-  const tours = await features.query;
-  if (!tours) {
-    return next(new AppError(err.message, 404));
-  }
+exports.getAlltours = factory.getAll(Tour); // APIFeatres
 
-  res.status(200).json({
-    status: 'success',
-    results: tours.length,
-    data: {
-      tours,
-    },
-  });
-});
-
-exports.getTour = catchAsync(async (req, res, next) => {
-  const id = req.params.id; // { id: '2' }
-  const tour = await Tour.findById(id).populate('reviews');
-  // Tour.findOne({_id:req.params.id})
-  if (!tour) {
-    // return res.status(404).json({
-    //   status: "fail",
-    //   message: "invalid or not found ID",
-    // });
-    return next(new AppError('invalid or not found ID', 404));
-  }
-  res.status(200).json({
-    status: 'success',
-    data: { tour },
-    id,
-  });
-});
+exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 
 //* 52- post requests
 // old way to save
