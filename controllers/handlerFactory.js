@@ -89,6 +89,7 @@ exports.getAll = (Model) => async (req, res) => {
     .sort()
     .limitFields()
     .paginate();
+  // const doc = await features.query.explain();
   const doc = await features.query;
   if (!doc) {
     return next(new AppError(err.message, 404));

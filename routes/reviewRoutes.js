@@ -10,24 +10,23 @@ const router = express.Router({ mergeParams: true });
 // /reviews
 
 // this will handel this router.use('/:tourId/reviews', reviewRoutes); which come from tourroute
-router
-  .route('/')
-  .get(authController.protect, reviewController.getAllReviews)
-  .post(
-    authController.protect,
-    authController.restrictTo('user'),
-    reviewController.setTourUserIds, // define req.user, req.tour Ids before create Review Fun
-    reviewController.createReview
-  );
+router.use(authController.protect);
+router.route('/').get(reviewController.getAllReviews).post(
+  authController.restrictTo('user'),
+  reviewController.setTourUserIds, // define req.user, req.tour Ids before create Review Fun
+  reviewController.createReview
+);
 
 router
   .route('/:id')
   .get(reviewController.getReview)
   .delete(
-    // authController.protect,
-    // authController.restrictTo('user'),
+    authController.restrictTo('user', 'admin'),
     reviewController.deleteReview
   )
-  .patch(reviewController.updateReview);
+  .patch(
+    authController.restrictTo('user', 'admin'),
+    reviewController.updateReview
+  );
 
 module.exports = router;
