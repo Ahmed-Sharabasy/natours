@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Tour = require('./tourModel');
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -33,6 +34,9 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
+// prevent duplicate reviews by craete unique index
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 reviewSchema.pre(/^find/, function (next) {
   // this.populate({path: 'tour',select: 'name',}).populate({path: 'user',select: 'name',});
   this.populate({
@@ -40,6 +44,51 @@ reviewSchema.pre(/^find/, function (next) {
     select: 'name',
   });
   next();
+});
+
+reviewSchema.statics.calcAverageRatings = async function (tourId) {
+  const tours = await this.aggregate([
+    {
+      $match: { tour: tourId },
+    },
+    {
+      $group: {
+        _id: '$tour',
+        nRating: { $sum: 1 },
+        avrgRatings: { $avg: '$rating' },
+      },
+    },
+  ]);
+  console.log(tours);
+  if (tours.length > 0) {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: tours[0].nRating,
+      ratingsAverage: tours[0].avrgRatings,
+    });
+  } else {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: 0,
+      ratingsAverage: 4.5,
+    });
+  }
+};
+
+// calcAverageRatings on tour after posted it in mongodb
+reviewSchema.post('save', function () {
+  // this point to curr doc which beaing save right now
+  // this.constructor instad of Review
+  this.constructor.calcAverageRatings(this.tour);
+});
+
+// calcAverageRatings after findOneAndUpdate , findOneAndDelete methods
+// pre ? before save doc save it in r to access it later
+reviewSchema.pre(/^findOneAnd/, async function (next) {
+  this.r = await this.model.findOne();
+  console.log(this.r);
+  next();
+});
+reviewSchema.post(/^findOneAnd/, async function () {
+  await this.r.constructor.calcAverageRatings(this.r.tour);
 });
 
 const Review = mongoose.model('Review', reviewSchema);
