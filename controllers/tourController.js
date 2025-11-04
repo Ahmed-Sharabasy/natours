@@ -19,7 +19,7 @@ const factory = require('./handlerFactory.js');
 
 //const testTour = new Tour({name: "The Forest Hiker",rating: 4.7,price: 497}).save().then((doc) => console.log(doc)).catch((err) => console.log(err.message));
 
-exports.getAlltours = factory.getAll(Tour); // APIFeatres
+exports.getAlltours = factory.getAll(Tour); // APIFeatures
 
 exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 
@@ -36,7 +36,7 @@ exports.deleteTour = factory.deleteOne(Tour);
 
 exports.getTourStats = async (req, res) => {
   try {
-    // array of statges and do it step by step
+    // array of stages and do it step by step
     const stats = await Tour.aggregate([
       {
         // match => find tours which ratingsAverage >= 4.5
@@ -56,7 +56,7 @@ exports.getTourStats = async (req, res) => {
       },
       {
         $sort: {
-          minPrice: 1, // 1: Assending
+          minPrice: 1, // 1: Ascending
         },
       },
     ]);
@@ -68,7 +68,7 @@ exports.getTourStats = async (req, res) => {
     });
   } catch (err) {
     res.status(404).json({
-      status: 'faild',
+      status: 'failed',
       data: err.message,
     });
   }
@@ -112,7 +112,7 @@ exports.getMonthlyPlan = async (req, res) => {
     });
   } catch (err) {
     res.status(404).json({
-      status: 'faild',
+      status: 'failed',
       data: err.message,
     });
   }
