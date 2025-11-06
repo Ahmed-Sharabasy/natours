@@ -16,6 +16,10 @@ const app = express();
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
+// read static files
+app.use(express.static(path.join(__dirname, 'public')));
+// app.use(express.static(`./public`));
+
 // using Global middleware 53, Ex: app.use((req, res, next) => {next()});
 
 // save app from attaks , ..... by sitting http hedears
@@ -42,10 +46,6 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-// read static files
-app.use(express.static(`${__dirname}/public`));
-// app.use(express.static(`./public`));
-
 // ROUTING Old way , or just static way
 // app.get('/api/v1/tours', getAlltours);
 // app.get('/api/v1/tours/:id', getTour);
@@ -61,7 +61,9 @@ app.use((req, res, next) => {
 
 // ROUTES
 app.get('/', (req, res) => {
-  res.render('base');
+  res.render('base', {
+    name: 'Ahmed Elsharabasy',
+  });
 });
 
 app.use('/api/v1/tours', tourRouter);
