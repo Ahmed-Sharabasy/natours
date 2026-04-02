@@ -4,10 +4,11 @@ const catchAsync = require('../utils/catchAsync.js');
 const AppError = require('../utils/appError.js');
 const factory = require('./handlerFactory.js');
 
-const users = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/users.json`, 'utf-8')
-);
+// const users = JSON.parse(
+//   fs.readFileSync(`${__dirname}/../dev-data/data/users.json`, 'utf-8')
+// );
 // console.log(users);
+//   const user = await User.findById({ _id: req.user.id });
 
 // filter arg methed
 const filterObj = function (data, ...arg) {
@@ -44,25 +45,6 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getAllUsers = async (req, res) => {
-  const users = await User.find();
-  res.status(200).json({
-    status: 'success',
-    data: { users },
-  });
-};
-
-// "5c8a1d5b0190b214360dc057"
-exports.getUser = (req, res) => {
-  const id = req.params.id;
-  const userAcc = users.find((el) => el._id === id);
-  console.log(userAcc);
-  res.status(200).json({
-    status: 'success',
-    data: { userAcc },
-  });
-};
-
 // Delete User : this when user delete himself
 exports.deleteMe = catchAsync(async (req, res, next) => {
   //1) set prob of user active = false
@@ -76,3 +58,12 @@ exports.deleteUser = factory.deleteOne(User); // Work on this Function Later
 
 //! Do NOT update passwords with this ?(MiddleWare validators dosnt work)
 exports.updateUser = factory.updateOne(User); // Work on this Function Later
+
+// MiddleWare to get current user id from protected auth fun
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
+
+exports.getUser = factory.getOne(User);
+exports.getAllUsers = factory.getAll(User);

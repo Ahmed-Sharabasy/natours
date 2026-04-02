@@ -104,6 +104,11 @@ userSchema.methods.createResetPasswordToken = async function () {
   return resetToken;
 };
 
-const User = mongoose.model('User', userSchema);
+// delete mongoose.models.User;
+// const User = mongoose.model('User', userSchema);
+
+// const User = mongoose.model('User', userSchema);
+// another way
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 module.exports = User;

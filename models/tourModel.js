@@ -96,6 +96,8 @@ const tourSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+// Create Indexes In MongoDB ? it hepls with proformance when excute a query
+tourSchema.index({ slug: 1 }); // Assinding order
 
 // Bulid Virtual prob
 tourSchema.virtual('durationWeeks').get(function () {
@@ -138,6 +140,7 @@ tourSchema.pre('aggregate', function (next) {
   next();
 });
 
-const Tour = mongoose.model('Tour', tourSchema);
+// const Tour = mongoose.model('Tour', tourSchema);
+const Tour = mongoose.models.Tour || mongoose.model('Tour', tourSchema);
 
 module.exports = Tour;

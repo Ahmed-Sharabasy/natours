@@ -1,3 +1,11 @@
+//example ?difficulty=easy&duration[gte]=5&price[lt]=1500&limit=5
+// {
+//   difficulty: 'easy',
+//   'duration[gte]': '5',
+//   'price[lt]': '1500',
+//   limit: '5'
+// }
+
 class APIFeatures {
   constructor(query, queryString) {
     this.query = query;
@@ -24,8 +32,8 @@ class APIFeatures {
   filter() {
     // Bulid Query
     const queryObj = { ...this.queryString }; // make hard copy to dont change the original object
-    const excludedFields = ["page", "limit", "sort", "fields"];
-    excludedFields.forEach((el) => delete queryObj[el]);
+    const excludedFields = ['page', 'limit', 'sort', 'fields'];
+    excludedFields.forEach((el) => delete queryObj[el]); // Allow filter only
     // Advanced Filltering
     // gte , gt , lte , lt
     const transformedQuery = this.transformQuery(queryObj);
@@ -33,22 +41,38 @@ class APIFeatures {
     return this;
   }
 
+  // filter() {
+  //   const queryObj = { ...this.queryString };
+  //   const excludedFields = ['page', 'limit', 'sort', 'fields'];
+  //   excludedFields.forEach((el) => delete queryObj[el]);
+
+  //   // تحويل عمليات المقارنة gte|gt|lte|lt إلى $gte|$gt...
+  //   const queryStr = JSON.stringify(queryObj).replace(
+  //     /\b(gte|gt|lte|lt)\b/g,
+  //     (match) => `$${match}`
+  //   );
+  //   const transformedQuery = JSON.parse(queryStr);
+
+  //   this.query = this.query.find(transformedQuery);
+  //   return this;
+  // }
+
   sort() {
     if (this.queryString.sort) {
-      const sortedBy = this.queryString.sort.split(",").join(" "); //price maxGroupSize
+      const sortedBy = this.queryString.sort.split(',').join(' '); //price maxGroupSize
       this.query = this.query.sort(sortedBy);
     } else {
-      this.query = this.query.sort("-createdAt");
+      this.query = this.query.sort('-createdAt');
     }
     return this;
   }
 
   limitFields() {
     if (this.queryString.fields) {
-      const fields = this.queryString.fields.split(",").join(" ");
+      const fields = this.queryString.fields.split(',').join(' ');
       this.query = this.query.select(fields);
     } else {
-      this.query = this.query.select("-__v"); // every thing exclude __v
+      this.query = this.query.select('-__v'); // every thing exclude __v
     }
     return this;
   }
