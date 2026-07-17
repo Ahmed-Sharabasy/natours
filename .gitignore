@@ -2,5 +2,3 @@
 /node_modules
 /.env
 config.env
-# ignore config.env
-/config.env
