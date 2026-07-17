@@ -16,13 +16,13 @@ dotenv.config({ path: './config.env' });
 
 const DB = process.env.DATABASE.replace(
   '<PASSWORD>',
-  process.env.DATABASE_PASSWORD
+  process.env.DATABASE_PASSWORD,
 );
 
 // this for connecting atls db
 mongoose.connect(DB).then((con) => {
   // console.log(con.connections);
-  console.log('database connected successful');
+  console.log('database connected successfully');
 });
 // .catch((err) => {console.log("bad cinnnnnnnnnnnnnnnnnnn")});
 
